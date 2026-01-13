@@ -1,0 +1,747 @@
+\documentclass[10pt,a4paper,landscape]{article}
+
+\usepackage{compactlayout}
+
+\begin{document}
+
+
+%------------ Four column -----------------
+\noindent
+\begin{minipage}[t]{0.24\textwidth}
+\textcolor{myred}{\textbf{L1-3 决策树}}
+熵: \(H(X)=-\sum_x p(x)\log p(x)\)\\
+联合熵: \(H(X,Y)=-\sum_{x,y} p(x,y)\log p(x,y)\)\\
+条件熵: \(H(Y|X)=-\sum_{x,y} p(x,y)\log p(y|x)\)\\
+交叉熵: \(H(p,q)=-\sum_x p(x)\log q(x)\)\\
+KL散度: \(D(p\Vert q)=\sum_x p(x)\log\frac{p(x)}{q(x)}\)\\
+互信息: \(I(X;Y)=\sum_{x,y} p(x,y)\log\frac{p(x,y)}{p(x)p(y)}\)\\
+\(H(X,Y) = H(X)+H(Y|X)=H(Y)+h(X|Y)\)\\
+\(I(X; Y) = H(X) - H(X \mid Y) = H(X) + H(Y) - H(X, Y)\)\\
+Vene图：$I(X;Y) = H(X)\cap H(Y);H(X;Y) = H(X)\cup H(Y)$\\
+集成方法: Bagging\(\rightarrow\)Random Forest；Boosting\(\rightarrow\)GBDT\\
+\textcolor{myyellow}{Splitting Criterion}:衡量split feature方法的好坏的函数。常见：Training ErrorRate（$\text{Error}(x_j) = \sum_{i=1}^{m} \frac{|D_i|}{|D|} \cdot \text{Error}(D_i)$）
+
+互信息：\(I(Y;X_i)\):
+
+$I(y; x_d) = H(y) - H(y \mid x_d) = H(y) - \sum_{v \in V(x_d)} f_v \cdot H(Y_{x_d = v})$,
+
+\( H(y) \) 为整个标签集合的熵；\( V(x_d) \) 为特征 \( x_d \) 的所有可能取值集合； \( f_v = \frac{|D_v|}{|D|} \) 为取值为 \( v \) 的样本比例；\( Y_{x_d = v} \) 是所有满足 \( x_d = v \) 的样本标签集合；
+
+\textcolor{myyellow}{pruning}：  Evaluate each split using a \textit{validation} dataset by comparing the validation error rate \textbf{with and without} that split；(Greedily) remove the split that most decreases the validation error rate； Stop if no split improves validation error, otherwise repeat
+
+%%%%%%%%%%%%%L4
+\textcolor{myred}{\textbf{L4 KNN}}
+
+对于M个特征，N个数据。Naive：Train$\mathcal{O}(1)$,Predict$\mathcal{O}(MN)$；k-d Tree：Train:$\mathcal{O}(MN \log N)$,Predict,$\mathcal{O}(2^M \log N)$
+
+\textcolor{myyellow}{Experimental Design}:当选好超参数后，最终模型需要在train-subset+validation(all-train)上重新训练
+
+%%%%%%%%%%%%%L4
+\textcolor{myred}{\textbf{L5 perceptron}}
+
+权重更新：$\boldsymbol{w} \leftarrow \boldsymbol{w} + \eta y_i \boldsymbol{x}_i$;
+偏置更新：$b \leftarrow b + \eta y_i$\\
+与$w$垂直的面并且对应的b就是decision boundary;\\
+最终的 $\mathbf{w}\;=\;\sum_{i=1}^{N} \alpha_i\, y^{(i)}\,\mathbf x^{(i)}$\\
+点到面距离\(
+\frac{\| \mathbf{w}^T (\mathbf{x}'' - \mathbf{x}') \|}{\|\mathbf{w}\|_2}
+= \frac{\| \mathbf{w}^T \mathbf{x}'' + b \|}{\|\mathbf{w}\|_2}
+= \frac{y_i(\boldsymbol{w}^T \boldsymbol{x}_i + b)}{\|\boldsymbol{w}\|}
+\)
+
+\textcolor{myred}{\textbf{L6 SVM}}
+
+\textcolor{myyellow}{KernelMethods}:\(K(\mathbf{x},\mathbf{z})=\Phi(\mathbf{x})\Phi(\mathbf{z})\);\(\Phi(\mathbf{x})=\)x的所有维度poly组合,同时可能改变维度
+
+$w_t = a_{i_1} x_{i_1} + \cdots + a_{i_k} x_{i_k}$,$w_t \cdot x = a_{i_1} x_{i_1} \cdot x + \cdots + a_{i_k} x_{i_k} \cdot x
+\quad \text{replace with} \quad
+a_{i_1} K(x_{i_1}, x) + \cdots + a_{i_k} K(x_{i_k}, x)$
+
+\textcolor{myyellow}{Mercer}:合法核函数满足：1.$K(x, z) = K(z, x)$; 2.$\mathbf{a}^\top \mathbf{K} \mathbf{a} \ge 0$(semi-definite半正定)
+
+\textcolor{myyellow}{核函数转化}: 想要$K(x, z) = c_1 K_1(x, z) + c_2 K_2(x, z)$,只需要更改$\phi(x) = \left( \sqrt{c_1}\, \phi_1(x),\ \sqrt{c_2}\, \phi_2(x) \right)$
+
+\textcolor{myyellow}{优化问题}:  
+$\max_{w, \alpha} \gamma$,约束: $\|\mathbf{w}\| = 1$ 且 $y_i(\mathbf{x}_i \cdot \mathbf{w} + \alpha) \ge \gamma$
+
+令 $\mathbf{w}' = \frac{\mathbf{w}}{\gamma}$，$\alpha' = \frac{\alpha}{\gamma}$
+
+原问题等价于：
+\(
+\min_{\mathbf{w}',\alpha'} \|\mathbf{w}'\|^2
+\)且\( \quad y_i(\mathbf{x}_i \cdot \mathbf{w}' + \alpha') \ge 1
+\)\\
+\textcolor{myyellow}{\textbf{SVM Optimizationl}}\\
+{Primal (soft‐margin) form}:  
+minimize over $w,b,\{\xi_i\}$ the objective $ \tfrac12\|w\|^2 + C\sum_{i=1}^m\xi_i$  
+subject to $y_i\,(w^\top x_i + b)\ge1 - \xi_i$ and $\xi_i\ge0\,$.\\
+{Lagrangian}: introduce multipliers $\alpha_i\in[0,C]$, $\mu_i\ge0$, and form  
+$\mathcal L=\tfrac12\|w\|^2 + C\sum_i\xi_i 
+ - \sum_i\alpha_i\bigl[y_i(w^\top x_i+b)-1+\xi_i\bigr]
+ - \sum_i\mu_i\,\xi_i\,$.\\
+Stationarity w.r.t.\ $w,b,\xi$ gives $w=\sum_i\alpha_i y_i x_i$, $\sum_i\alpha_i y_i=0$, and $\alpha_i+\mu_i=C\,$. Eliminating $w,b,\xi$ yields the dual QP:  
+maximize $\sum_{i=1}^m\alpha_i - \tfrac12\sum_{i,j}\alpha_i\alpha_j y_i y_j\,x_i^\top x_j$  
+subject to $\sum_{i=1}^m\alpha_i y_i=0$ and $0\le\alpha_i\le C\,$.\\
+{Decision function}: $f(x)=\mathrm{sign}\bigl(\sum_{i=1}^m\alpha_i y_i\,x_i^\top x + b\bigr)$, where support vectors satisfy $0<\alpha_i\le C\,$.\\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.24\textwidth}
+
+\textcolor{myred}{\textbf{L7 Regression}}\\
+\textcolor{myyellow}{KNN}: store all $(x,y)$ pairs; $k=1$ return nearest $y$; $k=2$ return weighted average $y$.\\
+\textcolor{myyellow}{Decision Tree Regression}: model as a binary tree with each internal node testing $x_j\le s$ and each leaf predicting a constant $\hat y_\ell$.\\
+Split criterion: choose feature $j$ and threshold $s$ to minimize $\Delta_{\rm MSE}(j,s)=\frac{|\mathcal D_{\rm left}|}{|\mathcal D|}\,\mathrm{MSE}(\mathcal D_{\rm left})+\frac{|\mathcal D_{\rm right}|}{|\mathcal D|}\,\mathrm{MSE}(\mathcal D_{\rm right})$, where $\mathrm{MSE}(\mathcal D)=\frac1{|\mathcal D|}\sum_{(x,y)\in\mathcal D}(y-\bar y)^2$.\\
+Leaf prediction: in leaf $\ell$ with data $\mathcal D_\ell$, set $\hat y_\ell=\frac1{|\mathcal D_\ell|}\sum_{(x,y)\in\mathcal D_\ell}y$.\\
+    
+\textcolor{myyellow}{\textbf{Optimization Method \#1: Gradient Descent}}\\
+Residual: $e^{(i)}=y^{(i)}-\hat y^{(i)}$.\\
+MSE objective: $J(\theta)=\frac1N\sum_{i=1}^N\bigl(y^{(i)}-(\theta^T x^{(i)}+b)\bigr)^2$.\\
+Gradient: $\nabla_\theta J(\theta)=\begin{bmatrix}
+\frac{\partial J}{\partial \theta_1} & \cdots & \frac{\partial J}{\partial \theta_M}
+\end{bmatrix}^T
+=\sum_{i=1}^N\bigl(\theta^T x^{(i)}-y^{(i)}\bigr)x^{(i)}$.\\
+Gradient descent update: $\theta\leftarrow\theta-\gamma\,\nabla_\theta J(\theta)$.\\
+Algorithm: initialize $\theta^{(0)}$; while not converged do $g=\sum_{i=1}^N(\theta^T x^{(i)}-y^{(i)})x^{(i)}$, $\theta\leftarrow\theta-\gamma g$; end; return $\theta$.\\
+Test time: $\hat y=h_\theta(x)=\theta^T x\,$.\\
+\textcolor{myyellow}{\textbf{Closed‐form Solution for Linear Regression}}\\
+Minimize MSE: $J(\theta)=\frac1{2N}\sum_{i=1}^N\bigl(y^{(i)}-\theta^T x^{(i)}\bigr)^2 
+= \frac1{2N}(X\theta - y)^T(X\theta - y) 
+= \frac1{2N}\bigl(\theta^T X^T X\theta -2\theta^T X^T y + y^T y\bigr)$.\\
+Set gradient to zero: $\nabla_\theta J(\theta)=\frac1{2N}(2X^T X\theta -2X^T y)=0 
+\;\Longrightarrow\;X^T X\hat\theta = X^T y$.
+Closed‐form solution: $\hat\theta=(X^T X)^{-1}X^T y\,$.\\
+Uniqueness:只要你的特征之间线性相关,collinearity,模型参数解就可能不唯一，存在无穷多组最优解。\\
+Core formula: $\hat\theta=(X^T X)^{-1}X^T y$, valid iff $X^T X$ invertible.\\
+Q1: Invertibility holds when $\mathrm{rank}(X)=D+1$, e.g.\ $N\gg D+1$ and no feature collinearity (if e.g.\ $x_3=2x_1+5x_2$, then not).\\
+Complexity: compute $X^T X\in\mathbb R^{(D+1)\times(D+1)}$ in $O(ND^2)$; invert it in $O(D^3)$; total $O(ND^2+D^3)$.\\
+closed‐form is fast  unique but requires full rank; otherwise use GD/SGD or regularization\\
+\textcolor{myyellow}{SGD}: Sample index $i\sim\mathrm{Uniform}\{1,2,\dots,N\}$. Compute gradient $g=\nabla_\theta J^{(i)}(\theta)$(单样本). Update $\theta\leftarrow\theta-\gamma\,g$.
+
+
+Derivative of per‐example loss $J^{(i)}(\theta)=\tfrac12(\theta^T x^{(i)}-y^{(i)})^2$:\\  
+$\frac{\partial}{\partial\theta_k}J^{(i)}(\theta)
+=\frac{\partial}{\partial\theta_k}\,\frac12\bigl(\theta^T x^{(i)}-y^{(i)}\bigr)^2
+=\bigl(\theta^T x^{(i)}-y^{(i)}\bigr)\,\frac{\partial}{\partial\theta_k}\bigl(\theta^T x^{(i)}-y^{(i)}\bigr)
+=\bigl(\theta^T x^{(i)}-y^{(i)}\bigr)\,x_k^{(i)}$\\
+Gradient for example $i$:  
+$\nabla_\theta J^{(i)}(\theta)
+=(\theta^T x^{(i)}-y^{(i)})\,x^{(i)}.$\\
+Full‐batch gradient of $J(\theta)=\frac1N\sum_i J^{(i)}(\theta)$:  
+$\nabla_\theta J(\theta)
+=\frac1N\sum_{i=1}^N\nabla_\theta J^{(i)}(\theta)
+=\frac1N\sum_{i=1}^N(\theta^T x^{(i)}-y^{(i)})\,x^{(i)}.$
+
+\textcolor{myyellow}{\textbf{Why SGD Works: Unbiased Gradient Estimation}}\\
+Let $i$ be sampled uniformly from $\{1,\dots,N\}$, so $P(i)=1/N$.\\
+ERM objective: $J(\theta)=\frac1N\sum_{i=1}^N J^{(i)}(\theta)$.\\
+Expectation definition: $E_i[f(i)]=\sum_{i=1}^N P(i)\,f(i)$.\\
+SGD gradient expectation:\\
+$E_i[\nabla_\theta J^{(i)}(\theta)] 
+=\sum_{i=1}^N\frac1N\,\nabla_\theta J^{(i)}(\theta) 
+=\nabla_\theta J(\theta)$.\\
+$\Rightarrow$ single‐sample gradient is an unbiased estimator of the full gradient.\\
+Intuition: noisy but in expectation follows the true direction.\\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.24\textwidth}
+
+\textcolor{myred}{\textbf{L12-13 Neural Network}}\\
+\textcolor{myyellow}{Perceptron}: \(a=\boldsymbol w^T\boldsymbol x+b,\;z=\phi(a)\).\\
+\textcolor{myyellow}{MLP Forward}: for layer \(l\): \(a^{(l)}=W^{(l)}z^{(l-1)}+b^{(l)},\;z^{(l)}=\phi(a^{(l)})\). Final output \(\hat y=z^{(L)}\). Loss: \(\mathcal L(\hat y,y)\).\\
+\textcolor{myyellow}{\(\delta\)误差项}: define \(\delta^{[l]}= \frac{\partial \mathcal{L}}{\partial z^{[l]}}\frac{\partial z^{[l]}}{\partial a^{[l]}}=\frac{\partial\mathcal L}{\partial z^{[l]}}\circ\phi'(a^{[l]})\). \\
+For output layer \(L\): \(\delta^{[L]}=\frac{\partial\mathcal L}{\partial\hat y}\circ\phi'(a^{[L]})\)\\
+\(\delta^{[l-1]}=(W^{[l]})^T\delta^{[l]}\circ\phi'(a^{[l-1]})\).\\
+\textcolor{myyellow}{Gradients}: \(\frac{\partial\mathcal L}{\partial W^{[l]}}=\delta^{[l]}\,(z^{[l-1]})^T,\;\frac{\partial\mathcal L}{\partial b^{[l]}}=\delta^{[l]}\).\\
+\textcolor{myyellow}{Update}: \(W^{[l]}\!:=W^{[l]}-\eta\,\frac{\partial\mathcal L}{\partial W^{[l]}},\;b^{[l]}\!:=b^{[l]}-\eta\,\frac{\partial\mathcal L}{\partial b^{[l]}}\).\\
+
+
+\textcolor{myred}{\textbf{L11 Feature Engineering \& Regularization}}\\
+\textcolor{myyellow}{Learned Embedding}: $f_{\text{deep}}(x)=\text{NN}(x)$.\\
+\textcolor{myyellow}{Polynomial Basis}: $\phi_k(x)=x^k,\;k=0,\dots,m$.\\
+\textcolor{myyellow}{Kernel Trick}: $K(x,x')=\langle\phi(x),\phi(x')\rangle$.\\
+\textcolor{myyellow}{Reg Obj}: $\min_\theta\; \mathcal L(\theta)+\lambda\,r(\theta)$.\\
+$\|\theta\|_q \;=\; \left( \sum_{m=1}^{M} |\theta_m|^{\,q} \right)^{\frac{1}{q}}$\\
+\textcolor{myyellow}{L2 Ridge}: $r(\theta)=\|\theta\|_2^2\;\Rightarrow\;\theta^*=(X^{\!T}X+\lambda I)^{-1}X^{\!T}y$.\\
+\textcolor{myyellow}{L1 Lasso}: $r(\theta)=\|\theta\|_1\;\Rightarrow\;\text{sparse }\theta^*$.不可导\\
+\textcolor{myyellow}{Gradient Update}: $\theta:=\theta-\eta\bigl(\nabla\mathcal L+\lambda\nabla r\bigr)$.\\
+\textcolor{myyellow}{CV Tune $\lambda$}: pick $\lambda=\arg\min_{\lambda}\mathcal L_{\text{val}}$.\\
+
+
+
+
+\textcolor{myred}{L14-15 CNN}\\
+k:卷积核大小,p:填充,s:步长
+
+\(y_{i,j}^{(c)}=\sum_{u=1}^{k}\sum_{v=1}^{k}\sum_{c'=1}^{C_{\text{in}}}
+               W_{u,v}^{(c,c')}x_{i+u,j+v}^{(c')}\).\\
+\(H_{\text{out}}=\Bigl\lfloor\frac{H_{\text{in}}+2P-k}{S}\Bigr\rfloor+1,\;
+                                   W_{\text{out}}=\Bigl\lfloor\frac{W_{\text{in}}+2P-k}{S}\Bigr\rfloor+1\).\\
+\textcolor{myyellow}{\#Params}: \(k^{2}C_{\text{in}}C_{\text{out}}+bias(C_{out})\).\\
+\textcolor{myyellow}{Receptive Field}: 视野域，由卷积核k决定\\
+\textcolor{myyellow}{Pooling}: Strid $S$\\
+\textcolor{myyellow}{Equivariance}: \(f(Tx)=T\,f(x)\);\;Invariance via pooling.\\
+
+\textcolor{myyellow}{ReLU}: \(f(a)=\max(0,a)\).\\
+\textcolor{myyellow}{Leaky ReLU}: \(f(a)=\max(\alpha a,a)\).\\
+\textcolor{myyellow}{ELU}: \(f(a)=\begin{cases}a,&a>0\\ \alpha\!\bigl(e^{a}-1\bigr),&a\le0\end{cases}\).\\
+\textcolor{myyellow}{Sigmoid}: \(\sigma(a)=\dfrac{1}{1+e^{-a}}\).\\
+\textcolor{myyellow}{tanh}: \(\tanh(a)=\dfrac{e^{a}-e^{-a}}{e^{a}+e^{-a}}\).\\
+\textcolor{myyellow}{Maxout}: \(f(a)=\max_{k}\bigl(w_k^{\!\top}x+b_k\bigr)\).\\
+
+
+\textcolor{myyellow}{\textbf{Model Complexity}}\\
+\textcolor{myyellow}{FLOPs (Conv)}: \(2k^{2}C_{\text{in}}C_{\text{out}}H_{\text{out}}W_{\text{out}}\).\\
+\textcolor{myyellow}{Same‐Pad Rule}: keep size when \(P=\tfrac{k-1}{2},\,S=1\).\\
+
+\textcolor{myyellow}{\textbf{Representative Architectures}}\\
+\textcolor{myyellow}{Residual Block}: \(y = F(x,W)+x\).\\
+\textcolor{myyellow}{DenseNet}: \(x_{l}=H_{l}\bigl([x_{0},x_{1},\dots,x_{l-1}]\bigr)\).\\
+\textcolor{myyellow}{1\(\times\)1 Conv}: feature mixing per pixel, acts like FC layer.\\
+
+\textcolor{myred}{\textbf{Upsampling \& Dilated Conv}}\\
+\textcolor{myyellow}{Transpose Conv (Size)}:
+   \(H_{\text{out}}=(H_{\text{in}}-1)S-2P+k_{\text{eff}}\).\\
+\textcolor{myyellow}{Dilated kernel}: \(k_{\text{eff}} = k + (k-1)(d-1)\).\\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.24\textwidth}
+
+
+\textcolor{myred}{L18 RNN}
+
+$\begin{aligned}
+h_t &= \tanh(W_{xh} x_t + W_{hh} h_{t-1} + b_h) \quad &\text{(隐藏状态更新)} \\
+y_t &= W_{hy} h_t + b_y \quad &\text{(输出)} \\
+\end{aligned}$
+
+\textcolor{myyellow}{LSTM}
+
+$\begin{aligned}
+i_t &= \sigma\!\bigl(W_{xi}\,x_t + W_{hi}\,h_{t-1} + b_i\bigr)             &\text{(输入门)} \\[2pt]
+f_t &= \sigma\!\bigl(W_{xf}\,x_t + W_{hf}\,h_{t-1} + b_f\bigr)             &\text{(遗忘门)} \\[2pt]
+o_t &= \sigma\!\bigl(W_{xo}\,x_t + W_{ho}\,h_{t-1} + b_o\bigr)             &\text{(输出门)} \\[2pt]
+g_t &= \tanh\!\bigl(W_{xg}\,x_t + W_{hg}\,h_{t-1} + b_g\bigr)              &\text{(候选记忆)} \\[4pt]
+c_t &= f_t \odot c_{t-1} + i_t \odot g_t                                   &\text{(记忆单元更新)} \\[4pt]
+h_t &= o_t \odot \tanh(c_t)                                                &\text{(隐藏状态)} \\[4pt]
+y_t &= W_{hy}\,h_t + b_y                                                   &\text{(输出)} \\
+\end{aligned}$
+
+
+% ==================== Transformer Self-Attention ====================
+
+\textcolor{myred}{L19 Attn}
+\(S = \frac{QK^{\!\top}}{{d_k}^{\frac{1}{2}}}\).
+\(A=\operatorname{softmax}(S+M)\)\;(mask \(M\!=-\infty\) above diag for causal).\\
+\(X' = AV\).
+ \(Q = XW_q,\; K = XW_k,\; V = XW_v\).\\
+\(X=[x_1,\dots,x_T]^{\top}\in\mathbb R^{T\times d_{\text{model}}}\).\\
+
+\textcolor{myyellow}{{Multi-Head Attn (H heads)}}\\
+{Per-Head}: \(Q^{(i)}\!=\!XW^{(i)}_q,\;K^{(i)}\!=\!XW^{(i)}_k,\;V^{(i)}\!=\!XW^{(i)}_v\).\\
+{Head Out}: \(X'^{(i)}=\operatorname{softmax}(\dfrac{Q^{(i)}K^{(i)\!\top}}{d_k^{\frac{1}{2}}}+M)V^{(i)}\).\\
+{Concat}: \(X=\operatorname{concat}\bigl(X'^{(1)},\dots,X'^{(H)}\bigr)\).\\
+% ==================== Pre-Training vs. Fine-Tuning ====================
+\textcolor{myyellow}{Pre-Training}\\
+{Init}: start from \emph{random} weights.\\
+{Mode A (unsup.)}: maximise likelihood / reconstr.\ on huge \underline{unlabeled} set.\\
+{Mode B (sup.)}: train on huge labeled set (e.g.\ ImageNet-21k, 14 M imgs).\\
+{Vision ex.}: autoencoder on MNIST; ImageNet cls.\ 21 k classes.\\
+{Language ex.}: The Pile (800 GB), Dolma (3 T tokens).\\[2pt]
+\textcolor{myyellow}{\textbf{Fine-Tuning}}\\
+{Init}: load \emph{pretrained} weights.\\
+(Opt.) Head: add small randomly-init prediction head.\\
+{Train}: back-prop on task-specific dataset.\\
+{Vision ex.}: COCO det.\ (200 k imgs), ADE20K seg.\\
+{NLP ex.}: MMLU few-shot (57 tasks); MBPP code-gen .\\
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{minipage}
+%------------ Four column end -------------
+
+
+\newpage
+
+%------------ Four column -----------------
+\noindent
+\begin{minipage}[t]{0.24\textwidth}
+\textcolor{myyellow}{Recommender Systems \& Collaborative Filtering}:\\
+Task: predict unknown user–item ratings in a sparse matrix \(R\!\in\!\mathbb R^{m\times n}\); quality often measured by RMSE.\\
+Paradigms: content-based (use side features) vs.\ collaborative (use interaction data only).\\
+CF families: neighborhood methods (user- / item-based similarity) and latent-factor methods (low-rank matrix factorization).\\
+
+\textcolor{myyellow}{Matrix Factorization (MF) Core Equations}:\\
+Model: \(R \approx UV^{\!\top}\) with \(U\!\in\!\mathbb R^{m\times k},\;V\!\in\!\mathbb R^{n\times k}\).\\
+Loss : \(J=\frac12\sum_{(i,j)\in\Omega}(R_{ij}-u_i^{\!\top}v_j)^2+\frac\lambda2(\|U\|_F^2+\|V\|_F^2)\).\\
+SGD update: \(u_i \leftarrow u_i+\eta(e_{ij}v_j-\lambda u_i),\;v_j \leftarrow v_j+\eta(e_{ij}u_i-\lambda v_j)\) where \(e_{ij}=R_{ij}-u_i^{\!\top}v_j\).\\
+ALS: alternately fix \(V\) and solve \(U\), then fix \(U\) and solve \(V\) via least squares.\\
+Variants: SVD for fully observed data, non-negative MF, implicit-feedback MF, bias terms, etc.
+
+\textcolor{myyellow}{Ensemble Learning}:\\Bagging (parallel bootstrap) and Boosting (sequential re-weighting).
+
+\textcolor{myyellow}{Bagging \& Random Forests}:\\
+Bootstrap Bagging: draw \(S\) bootstrap samples, train \(T\) base models, aggregate by majority vote(regression compute mean).\\
+Feature Bagging: each learner sees only a random subspace of features.\\
+Random Forest: bootstrap samples \emph{plus} random feature subset at every tree split.\\(OOB error: ~37 \% out-of-bag )
+
+\textcolor{myyellow}{Weighted Majority Algorithm}:\\
+Online setting with \(N\) experts; start equal weights; prediction by weighted vote; if expert errs, multiply its weight by \(\beta\!\in\!(0,1)\).
+
+
+\textcolor{myyellow}{AdaBoost}:\\
+Initial distribution \(D_1(i)=1/N\).\\
+At round \(t\): train weak learner \(h_t\) w, error \(\varepsilon_t\); set \(\alpha_t=\tfrac12\ln\frac{1-\varepsilon_t}{\varepsilon_t}\).\\
+Update \(D_{t+1}(i)=\dfrac{D_t(i)\exp(-\alpha_t y_i h_t(x_i))}{Z_t}\).\\
+Final classifier \(H(x)=\operatorname{sign}\bigl(\sum_{t=1}^{T}\alpha_t h_t(x)\bigr)\).\\
+Properties: empirical error drops exponentially; margin theory explains generalization.
+
+\textcolor{myyellow}{Key Comparison}:\\
+Bagging — variance reduction, fully parallel, excels with high-variance bases.\\
+Boosting — bias reduction, turns weak into strong, sensitive to noisy labels/outliers.\\
+Random Forest — efficient, parallelizable, offers OOB validation and feature interpretability.\\
+
+
+
+
+
+
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.24\textwidth}
+\textcolor{myred}{L10 Logistic}
+
+% ------------------- Logistic Regression Cheat-Sheet -------------------
+\( f(x)=\sigma(\theta^{\top}x+b) \),\; where  
+\( \sigma(z)=\dfrac{1}{1+e^{-z}} \).\\
+\( P(y=1\mid x)=\sigma(\theta^{\top}x+b) \),\;
+
+\textcolor{myyellow}{Objective (negative log-likelihood)}:\\
+\( \ell(\theta)= -\dfrac{1}{N}\log P(y^{(1)},\dots ,y^{(N)}\mid x^{(1)},\dots ,x^{(N)},\theta) \)\\
+\( =-\dfrac{1}{N}\log\prod_{n=1}^{N}P(y^{(n)}\mid x^{(n)},\theta) \)\\
+\( =-\dfrac{1}{N}\log\prod_{n=1}^{N}\bigl(P(Y\!=\!1\mid x^{(n)},\theta)\bigr)^{y^{(n)}}\!
+                                   \bigl(P(Y\!=\!0\mid x^{(n)},\theta)\bigr)^{1-y^{(n)}} \)\\
+\( =-\dfrac{1}{N}\sum_{n=1}^{N}y^{(n)}\log P(Y\!=\!1\mid x^{(n)},\theta)
+                             +(1-y^{(n)})\log P(Y\!=\!0\mid x^{(n)},\theta) \)\\
+\( =-\dfrac{1}{N}\sum_{n=1}^{N}y^{(n)}\theta^{\top}x^{(n)}
+        -\log\!\bigl(1+e^{\theta^{\top}x^{(n)}}\bigr) \).
+        
+\textcolor{myyellow}{Gradients}:\\
+\( J(\theta)=\ell(\theta) \).\\
+\( \displaystyle\nabla_{\theta}J(\theta)=
+      \frac{1}{N}\sum_{n=1}^{N}x^{(n)}\bigl(\hat y^{(n)}-y^{(n)}\bigr),\;
+   \hat y^{(n)}=\sigma(\theta^{\top}x^{(n)}+b) \).\\
+Weight update:  
+\( \theta:=\theta-\eta\,\nabla_{\theta}J(\theta) \).\\
+Bias gradient / update:  
+\( \dfrac{\partial J}{\partial b}= \dfrac{1}{N}\sum_{n=1}^{N}(\hat y^{(n)}-y^{(n)}),\;
+   b:=b-\eta\,\dfrac{\partial J}{\partial b} \).
+   
+\textcolor{myyellow}{Bayes Decision Rule}:\\
+\( \hat y=\arg\max_{y\in\{0,1\}}P(y\mid x)=
+\begin{cases}
+1,&\sigma(\theta^{\top}x+b)\ge 0.5\\
+0,&\text{otherwise}
+\end{cases}
+\;\Longleftrightarrow\;
+\begin{cases}
+1,&\theta^{\top}x+b\ge0\\
+0,&\text{otherwise.}
+\end{cases} \)\\
+Decision boundary: \( \theta^{\top}x+b=0 \).
+
+\textcolor{myyellow}{Why log-likelihood, not likelihood}:\\
+1. Turns products into sums → easier calculus.\\
+2. \(\log\) is monotone ⇒ optimum unchanged.\\
+3. Prevents underflow from tiny products.\\
+4. Simplifies gradients, convergence analysis.\\[2pt]
+
+Cross-entropy loss (same expression as \( \ell(\theta) \)) is thus obtained by
+maximizing the Bernoulli likelihood of the labels.\\
+
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.24\textwidth}
+
+
+% ============================================ L21 KMeans ====================================
+% ============================================ L21 KMeans ====================================
+% ============================================ L21 KMeans ====================================
+
+
+\textcolor{myred}{L21 KMeans}\\
+问题定义: N个点,聚类成K个类. 输出: K个center和对于每个点的标签\\
+choose the nearest centre: $z^{(i)} \;=\; \arg\min_{j}\, \bigl\|\mathbf{x}^{(i)} - \mathbf{c}_j\bigr\|_2^{2}.$
+
+$
+\hat{\mathbf{C}}
+    \;=\;
+    \arg\min_{\mathbf{C}}
+    \sum_{i=1}^{N}
+    \min_{j}
+    \bigl\|\mathbf{x}^{(i)} - \mathbf{c}_j\bigr\|_2^{2}
+    \;=\;
+    \arg\min_{\mathbf{C},\,\mathbf{z}}
+    \sum_{i=1}^{N}
+    \bigl\|\mathbf{x}^{(i)} - \mathbf{c}_{z^{(i)}}\bigr\|_2^{2}
+    \;=\;
+    \arg\min_{\mathbf{C},\,\mathbf{z}} J(\mathbf{C},\mathbf{z}).
+$
+
+$
+J(\{C_k\}_{k=1}^{K})
+=\sum_{k=1}^{K}\,
+\sum_{\mathbf{x}\in C_k}
+\bigl\lVert \mathbf{x}-\boldsymbol{\mu}_k \bigr\rVert_2^{2},
+\qquad
+\boldsymbol{\mu}_k=\frac{1}{|C_k|}\sum_{\mathbf{x}\in C_k}\mathbf{x}.
+$\\
+Lloyd 算法: 随机初始化，然后repeat until converge:
+
+a. Assignment step: 
+$
+z^{(i)} \leftarrow \arg\min_{j}
+      \bigl\|\mathbf{x}^{(i)} - \mathbf{c}_j\bigr\|_2^{2},
+      \quad i=1,\dots,N.
+$
+b. Update step: 
+$
+\mathbf{c}_j
+      \leftarrow
+      \frac{1}{|C_j|}
+      \sum_{\mathbf{x}^{(i)}:\,z^{(i)} = j}
+      \mathbf{x}^{(i)},
+      \quad j=1,\dots,K,
+$
+
+FPH:$D(x) = \min_{c \in C} \|x - c\|_2$, Select the $c_k = \arg\max_{x \in X} D(x)$ for next center until have chosen K centers
+
+K-means++:   以$P(\mathbf{x})=\frac{D(\mathbf{x})^2}{\sum_{\mathbf{x}'}D(\mathbf{x}')^2}$ 概率选下一个center
+
+理论误差保证:$\mathbb{E}[\text{Cost}_{\text{K++}}] \leq O(\log K) \cdot \text{OPT}$
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.24\textwidth}
+% ============================================ L21 EM ====================================
+% ============================================ L21 EM ====================================
+% ============================================ L21 EM ====================================
+\textcolor{myred}{L22 EM+GMM}\\
+\textcolor{myyellow}{Parameter Estimation with Latent Variables}:\\
+
+    \( 
+      \log p(\mathbf X \mid \Theta)
+      = \log \sum_{z} p(\mathbf X,z \mid \Theta)
+      = \log \sum_{z} q(z)\,\frac{p(\mathbf X,z \mid \Theta)}{q(z)}
+    \)\\
+    \( 
+      \phantom{\log p(\mathbf X \mid \Theta)}
+      \;\ge\;
+      \sum_{z} q(z)\,
+      \log\frac{p(\mathbf X,z \mid \Theta)}{q(z)}
+      \quad
+      (\text{concave } f,\ \text{Jensen: } f(\sum \lambda_i x_i) \ge \sum \lambda_i f(x_i))
+    \)\\
+    \( 
+      \log p(\mathbf X \mid \Theta)
+      \;\ge\;
+      \sum_{z} q(z)\,\log p(\mathbf X,z \mid \Theta)
+      -\sum_{z} q(z)\,\log q(z)
+      =\sum_{z} q(z)\,\log p(\mathbf X,z \mid \Theta)+\text{const.}
+    \qquad
+      \bigl(\text{term independent of } \Theta\bigr)
+    \)
+ If we set \( q(z)=p(z \mid \mathbf X,\Theta) \), the inequality becomes equality\\
+    \(
+      \sum_{z} q(z)\,
+      \log\frac{p(\mathbf X,z \mid \Theta)}{q(z)}
+      =
+      \sum_{z} p(z \mid \mathbf X,\Theta)\,
+      \log\frac{p(z \mid \mathbf X,\Theta)\,p(\mathbf X \mid \Theta)}{p(z \mid \mathbf X,\Theta)}
+      =
+      \sum_{z} p(z \mid \mathbf X,\Theta)\,\log p(\mathbf X \mid \Theta)
+      =
+      \log p(\mathbf X \mid \Theta)
+    \)
+ Thus for \( q(z)=p(z \mid \mathbf X,\Theta) \) we have\\
+    \(
+      \log p(\mathbf X \mid \Theta)
+      =
+      \sum_{z} p(z \mid \mathbf X,\Theta)\,\log p(\mathbf X,z \mid \Theta)
+      +\text{const.}
+      =
+      \mathbb E_{p(z \mid \mathbf X,\Theta)}
+      \bigl[\log p(\mathbf X,z \mid \Theta)\bigr]+\text{const.}
+    \)
+ Therefore \( \log p(\mathbf X \mid \Theta) \) is tightly lower-bounded by
+        \( \mathbb E\!\bigl[\log p(\mathbf X,z \mid \Theta)\bigr] \),
+        which the EM algorithm maximizes.
+        
+\textcolor{myyellow}{Expectation Maximization (EM) Algorithm}:\\
+\textbf{E (Expectation) step}:\\
+\quad Compute the posterior \( p(\mathbf Z\!\mid\!\mathbf X,\Theta^{\text{old}}) \) over latent variables \( \mathbf Z \) using \( \Theta^{\text{old}} \).
+\quad Compute the expected complete-data log-likelihood with respect to this posterior:\\
+\quad \( Q(\Theta,\Theta^{\text{old}})=
+        \mathbb E_{p(\mathbf z\mid\mathbf x,\Theta^{\text{old}})}
+        \bigl[\log p(\mathbf X,\mathbf Z\!\mid\!\Theta)\bigr]
+        =\sum_{\mathbf z} p(\mathbf Z\!\mid\!\mathbf X,\Theta^{\text{old}})
+          \log p(\mathbf X,\mathbf Z\!\mid\!\Theta). \)\\
+\textbf{M (Maximization) step}:\\
+\quad Maximize \( Q \) with respect to \( \Theta \).\\
+\quad For maximum-likelihood estimation (MLE):\;
+\( \Theta^{\text{new}}=\arg\max_{\Theta}\, Q(\Theta,\Theta^{\text{old}}). \)\\
+\quad For maximum-a-posteriori (MAP) estimation:\;
+\( \Theta^{\text{new}}=\arg\max_{\Theta}\!\bigl\{ Q(\Theta,\Theta^{\text{old}})+\log p(\Theta) \bigr\}. \)\\
+If the log-likelihood or the parameter values have not converged, set \( \Theta^{\text{old}}=\Theta^{\text{new}} \) and return to the E step.\\
+The algorithm converges to a local maximum of \( p(\mathbf X\!\mid\!\Theta) \).
+
+
+\textcolor{myyellow}{EM for Gaussian Mixture Model (GMM)}:\\
+Initialize parameters \( \Theta=\{\pi_k,\mu_k,\Sigma_k\}_{k=1}^K \) 
+
+Iterate until \( \log p(\mathbf X\!\mid\!\Theta) \) convergence :\\
+\quad\textbf{E-step:}\\
+\quad\(\displaystyle 
+\gamma_{ik}=p(z_i=k\mid x_i,\Theta^{\text{old}})
+          =\frac{\pi_k^{\text{old}}\,
+                 \mathcal N(x_i\mid\mu_k^{\text{old}},\Sigma_k^{\text{old}})}
+                 {\sum_{j=1}^K\pi_j^{\text{old}}\,
+                 \mathcal N(x_i\mid\mu_j^{\text{old}},\Sigma_j^{\text{old}})}.
+\)
+\quad Expected complete-data log-likelihood:\\
+\quad\(\displaystyle 
+Q(\Theta,\Theta^{\text{old}})
+      =\mathbb E_{Z\mid X,\Theta^{\text{old}}}
+       [\log p(\mathbf X,\mathbf Z\mid\Theta)]
+      =\sum_{i=1}^{N}\sum_{k=1}^{K}
+        \gamma_{ik}\bigl(\log\pi_k+\log\mathcal N(x_i\mid\mu_k,\Sigma_k)\bigr).
+\)
+
+\textbf{M-step:} maximize \( Q \) with respect to \( \Theta \):
+\quad  (with \( \sum_k\pi_k=1 \)):\\
+\quad\(\displaystyle 
+\pi_k^{\text{new}}
+      =\frac{1}{N}\sum_{i=1}^{N}\gamma_{ik}.
+\)
+\quad\(\displaystyle 
+\mu_k^{\text{new}}
+      =\frac{\sum_{i=1}^{N}\gamma_{ik}x_i}{\sum_{i=1}^{N}\gamma_{ik}}.
+\)\\
+\quad\(\displaystyle 
+\Sigma_k^{\text{new}}
+      =\frac{\sum_{i=1}^{N}
+              \gamma_{ik}(x_i-\mu_k^{\text{new}})(x_i-\mu_k^{\text{new}})^{\!\top}}
+             {\sum_{i=1}^{N}\gamma_{ik}}.
+\)\\
+
+ \( p(\mathbf X,\mathbf Z\mid\Theta)=
+\prod_{i=1}^{N}\pi_{z_i}\,\mathcal N(x_i\mid\mu_{z_i},\Sigma_{z_i}) \).\\
+\( \log p(\mathbf X,\mathbf Z\mid\Theta)=
+\sum_{i=1}^{N}\bigl(\log\pi_{z_i}+\log\mathcal N(x_i\mid\mu_{z_i},\Sigma_{z_i})\bigr) \).\\
+Gaussian PDF in \( D \) dimensions: \( \mathcal N(x\mid\mu_k,\Sigma_k)=
+(2\pi)^{-D/2}|\Sigma_k|^{-1/2}
+\exp\!\bigl(-\tfrac12(x-\mu_k)^{\!\top}\Sigma_k^{-1}(x-\mu_k)\bigr) \).
+
+
+
+
+\end{minipage}
+%------------ Four column end -------------
+
+\newpage
+
+\begin{minipage}[t]{0.24\textwidth}
+\textcolor{myred}{L23 PCA}:
+\textcolor{myyellow}{Data Centering}:
+Mean vector \( \mu=\dfrac{1}{N}\sum_{n=1}^{N}\mathbf x^{(n)} \).\\
+Centered samples \( \tilde{\mathbf x}^{(n)}=\mathbf x^{(n)}-\mu\ \forall\,n \).\\
+Stacked matrix \( X=\begin{bmatrix}\tilde{\mathbf x}^{(1)^{\!T}} \tilde{\mathbf x}^{(2)^{\!T}} \cdots \tilde{\mathbf x}^{(N)^{\!T}}\end{bmatrix}^T\in\mathbb R^{N\times D} \).\\
+\textcolor{myyellow}{Sample Variance \& Covariance}:\\
+One-dimensional variance \( \hat\sigma^{2}=\dfrac{1}{N}\sum_{i=1}^{N}\bigl(x^{(i)}-\hat\mu\bigr)^{2} \).\\
+\( \Sigma_{jk}=\dfrac{1}{N}\sum_{i=1}^{N}\bigl(x_{j}^{(i)}-\hat\mu_{j}\bigr)\bigl(x_{k}^{(i)}-\hat\mu_{k}\bigr) \).\\
+Matrix form \( \Sigma=\dfrac{1}{N}X^{T}X \).\\
+\textcolor{myyellow}{Projection \& Reconstruction Error}:\\
+Projection of \( \tilde{\mathbf x}^{(n)} \) onto unit vector \( \mathbf v \):
+\( z^{(n)}=\mathbf v^{T}\tilde{\mathbf x}^{(n)} \).\\
+Reconstruction error summed over data:\\  
+\( 
+\sum_{n=1}^{N}\bigl\|\tilde{\mathbf x}^{(n)}-(\mathbf v^{T}\tilde{\mathbf x}^{(n)})\mathbf v\bigr\|_{2}^{2}
+       =\sum_{n=1}^{N}\bigl\|\tilde{\mathbf x}^{(n)}\bigr\|_{2}^{2}-\sum_{n=1}^{N}\bigl(\mathbf v^{T}\tilde{\mathbf x}^{(n)}\bigr)^{2}.
+\)\\
+Minimizing the error \(\iff\) maximizing the second term (projected variance).\\
+\textcolor{myyellow}{Variance Maximization Form}:\\
+\( 
+\hat{\mathbf v}=\arg\max_{\mathbf v:\|\mathbf v\|_{2}^{2}=1}
+        \sum_{n=1}^{N}\bigl(\mathbf v^{T}\tilde{\mathbf x}^{(n)}\bigr)^{2}
+      =\arg\max_{\mathbf v:\|\mathbf v\|_{2}^{2}=1}
+        \mathbf v^{T}\!\Bigl(\sum_{n=1}^{N}\tilde{\mathbf x}^{(n)}\tilde{\mathbf x}^{(n)^{\!T}}\Bigr)\mathbf v
+      =\arg\max_{\mathbf v:\|\mathbf v\|_{2}^{2}=1}
+        \mathbf v^{T}(X^{T}X)\mathbf v.
+\)\\
+\textcolor{myyellow}{Eigenvalue Problem}:\\
+Lagrangian \( \mathcal L(\mathbf v,\lambda)=\mathbf v^{T}(X^{T}X)\mathbf v-\lambda(\|\mathbf v\|_{2}^{2}-1) \).\\
+Gradient condition \( 2(X^{T}X)\hat{\mathbf v}-2\lambda\hat{\mathbf v}=0 \Rightarrow (X^{T}X)\hat{\mathbf v}=\lambda\hat{\mathbf v}. \)\\
+Thus \( \hat{\mathbf v} \) is an eigenvector of \( X^{T}X \) (or \( \Sigma \)) and  
+\( \lambda \) is the associated eigenvalue (variance along that component).\\
+Principal components are the eigenvectors ordered by decreasing \( \lambda \);  
+\( \lambda_i \) quantifies variance captured by component \( \hat{\mathbf v}_i \).\\
+\textcolor{myyellow}{PCA Algorithm}:\\
+1. Center data \( \mathbf X\rightarrow X \).\\
+2. Compute covariance matrix \( \Sigma=\dfrac{1}{N}X^{T}X \).\\
+3. Eigendecompose \( \Sigma\Rightarrow\{(\hat{\mathbf v}_i,\lambda_i)\} \).\\
+4. Select top \( K \) eigenvectors \( V_{K}=[\hat{\mathbf v}_1,\dots,\hat{\mathbf v}_K] \).\\
+5. Low-dim projection \( \mathbf z^{(n)}=V_{K}^{T}\tilde{\mathbf x}^{(n)} \).\\
+Applications: visualization, noise reduction, improved generalization in downstream tasks.\\
+
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.24\textwidth}
+% ---------- SVM: Geometry ➜ Primal ➜ Dual ➜ Soft Margin ➜ Kernel ----------
+
+
+
+\( \displaystyle
+\min_{w,b}\;\tfrac12\lVert w\rVert^{2}\;
+\text{s.t. }y_i\,(w^{\!\top}x_i+b)\ge1
+\).
+
+\textcolor{myyellow}{Lagrange Dual (Support Vectors emerge)}:\\
+Lagrangian\\
+\( \mathcal L(w,b,\alpha)
+   =\tfrac12\lVert w\rVert^{2}
+    -\!\sum_{i=1}^{m}\alpha_i\bigl[y_i\,(w^{\!\top}x_i+b)-1\bigr],\;
+    \alpha_i\ge0. \)\\
+Stationarity\\
+\( w=\sum_{i}\alpha_i y_i x_i,\;
+   \sum_{i}\alpha_i y_i=0. \)\\
+Dual\\
+\( \displaystyle
+\max_{\alpha}\sum_{i}\alpha_i
+       -\frac12\sum_{i,j}\alpha_i\alpha_j y_i y_j\,x_i^{\!\top}x_j,\;
+   \alpha_i\ge0,\;
+   \sum_i\alpha_i y_i=0.
+\)\\
+KKT\\
+\( \alpha_i\bigl[y_i(w^{\!\top}x_i+b)-1\bigr]=0 \).
+Only \( \alpha_i>0 \) are \emph{support vectors}.\\
+\textcolor{myyellow}{Soft-Margin SVM (Hinge Loss)}:\\
+Primal
+\( \displaystyle
+\min_{w,b,\xi}\tfrac12\lVert w\rVert^{2}
+     +C\sum_{i=1}^{m}\xi_i,\;
+y_i\,(w^{\!\top}x_i+b)\ge1-\xi_i,\;
+\xi_i\ge0.
+\)\\
+Hinge loss \( \ell=\max\{0,1-y_i(w^{\!\top}x_i+b)\} \).\\
+Dual\\
+\( \displaystyle
+\max_{\alpha}\sum_{i}\alpha_i
+       -\tfrac12\sum_{i,j}\alpha_i\alpha_j y_i y_j\,x_i^{\!\top}x_j,\;
+0\le\alpha_i\le C,\;
+\sum_i\alpha_i y_i=0.
+\)\\
+SV classes: \( 0<\alpha_i<C \) (on/inside margin), \( \alpha_i=C \) (errors).
+
+\textcolor{myyellow}{Kernel Trick – Non-linear SVM}:\\
+Replace inner product: \( x_i^{\!\top}x_j \rightarrow K(x_i,x_j) \).\\
+Dual\\
+\( \displaystyle
+\max_{\alpha}\sum_{i}\alpha_i
+   -\tfrac12\sum_{i,j}\alpha_i\alpha_j y_i y_j\,K(x_i,x_j),\;
+0\le\alpha_i\le C,\;
+\sum_i\alpha_i y_i=0.
+\)\\
+Classifier
+\( f(x)=\operatorname{sign}\!\bigl(\sum_{i}\alpha_i y_i K(x_i,x)+b\bigr) \).
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.24\textwidth}
+
+$ $
+
+
+\end{minipage}
+\hfill
+\begin{minipage}[t]{0.24\textwidth}
+
+$ $
+
+
+\end{minipage}
+\hfill
+\end{document}
